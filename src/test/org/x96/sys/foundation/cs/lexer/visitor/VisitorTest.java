@@ -5,59 +5,60 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.x96.sys.foundation.buzz.cs.lexer.visitor.BuzzVisitorMismatch;
+import org.x96.sys.foundation.cs.lexer.router.serial.Serial;
 import org.x96.sys.foundation.cs.lexer.token.Kind;
 import org.x96.sys.foundation.cs.lexer.token.Token;
 import org.x96.sys.foundation.cs.lexer.tokenizer.Tokenizer;
-import org.x96.sys.foundation.cs.lexer.visitor.entry.Terminal;
+import org.x96.sys.foundation.cs.lexer.visitor.entry.terminals.Terminal;
 import org.x96.sys.foundation.cs.lexer.visitor.factory.ReflectiveVisitorFactory;
 import org.x96.sys.foundation.io.ByteStream;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.x96.sys.foundation.buzz.cs.lexer.visitor.BuzzVisitorMismatch;
 
 class VisitorTest {
 
-//    @Test
-//    void happyWrapBuzzVisitorMismatch() {
-//        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] {0x30}));
-//        t.advance();
-//        Visitor v = new GhostVisitor(t);
-//        var e = assertThrows(BuzzVisitorMismatch.class, v::safeVisit);
-//
-//        String expected =
-//                String.format(
-//                        """
-//                        🦕 [0xFFF]
-//                        🐝 [BuzzVisitorMismatch]
-//                        🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
-//                           > Tokenizer.pointer[1]
-//                           > Tokens Allowed [%s]
-//                          1 | \u00020\u0003
-//                        1:1 | ^
-//                          2 |\s
-//                        """,
-//                        discoveryAllowed(v.getClass()));
-//        String comming = e.getMessage();
-//
-//        Serial s = new Serial();
-//        s.oneOrMore(Terminal.class);
-//        for (Token token : s.stream(new Tokenizer(ByteStream.raw(expected.getBytes())))) {
-//            System.out.println(token);
-//        }
-//
-//        System.out.println("=========================");
-//        s = new Serial();
-//        s.oneOrMore(Terminal.class);
-//        for (Token token :
-//                s.stream(
-//                        new Tokenizer(
-//                                ByteStream.raw(
-//                                        comming.replaceAll("\u001B\\[[;\\d]*m", "").getBytes())))) {
-//            System.out.println(token);
-//        }
-//        assertEquals(expected, comming.replaceAll("\u001B\\[[;\\d]*m", ""));
-//    }
+    @Test
+    void happyWrapBuzzVisitorMismatch() {
+        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] {0x30}));
+        t.advance();
+        Visitor v = new GhostVisitor(t);
+        var e = assertThrows(BuzzVisitorMismatch.class, v::safeVisit);
+
+        String expected =
+                String.format(
+                        """
+                        🦕 [0xFFF]
+                        🐝 [BuzzVisitorMismatch]
+                        🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
+                           > Tokenizer.pointer[1]
+                           > Tokens Allowed [%s]
+                          1 | \u00020\u0003
+                        1:1 | ^
+                          2 |\s
+                        """,
+                        discoveryAllowed(v.getClass()));
+        String message = e.getMessage();
+
+        Serial s = new Serial();
+        s.oneOrMore(Terminal.class);
+        for (Token token : s.stream(new Tokenizer(ByteStream.raw(expected.getBytes())))) {
+            System.out.println(token);
+        }
+
+        System.out.println("=========================");
+        s = new Serial();
+        s.oneOrMore(Terminal.class);
+        for (Token token :
+                s.stream(
+                        new Tokenizer(
+                                ByteStream.raw(
+                                        message.replaceAll("\u001B\\[[;\\d]*m", "").getBytes())))) {
+            System.out.println(token);
+        }
+        assertEquals(expected, message.replaceAll("\u001B\\[[;\\d]*m", ""));
+    }
 
     @Test
     void happyBuzzVisitorMismatch() {
