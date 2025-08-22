@@ -22,7 +22,7 @@ public abstract class Visitor implements Visiting {
 
     @Override
     public Token[] visit() {
-        rec(overkind());
+        rec();
         return stream();
     }
 
@@ -34,7 +34,15 @@ public abstract class Visitor implements Visiting {
         }
     }
 
+    /**
+     * @deprecated Use {@link #overKind()} instead.
+     */
+    @Deprecated
     public String overkind() {
+        throw new UnsupportedOperationException("deve ser implementado pelo visitante");
+    }
+
+    public String overKind() {
         throw new UnsupportedOperationException("deve ser implementado pelo visitante");
     }
 
@@ -59,13 +67,14 @@ public abstract class Visitor implements Visiting {
     }
 
     public Token[] stream() {
-        if (mod == null) return tokens.toArray(Token[]::new);
+        if (mod == null)
+            return tokens.toArray(Token[]::new);
 
         return tokens.stream()
                 .peek(
                         t -> {
                             if (mod instanceof Shell) {
-                                t.overKind(overkind());
+                                t.overKind(overKind());
                             } else {
                                 throw new RuntimeException("sem suporte ainda");
                             }

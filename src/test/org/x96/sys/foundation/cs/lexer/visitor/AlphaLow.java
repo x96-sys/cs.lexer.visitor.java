@@ -13,8 +13,9 @@ public class AlphaLow extends Visitor {
 
     @Override
     public Token[] visit() {
-        if (look() < 0x61 || look() > 0x7A) throw new BuzzVisitorMismatch(this, this.tokenizer);
-        rec(overkind());
+        if (look() < 0x61 || look() > 0x7A)
+            throw new BuzzVisitorMismatch(this, this.tokenizer);
+        rec(overKind());
         return stream();
     }
 
@@ -24,7 +25,7 @@ public class AlphaLow extends Visitor {
     }
 
     @Override
-    public String overkind() {
+    public String overKind() {
         return "alpha_low";
     }
 }

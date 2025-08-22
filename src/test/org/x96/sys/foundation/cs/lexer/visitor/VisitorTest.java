@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.x96.sys.foundation.buzz.cs.lexer.visitor.BuzzVisitorMismatch;
+import org.x96.sys.foundation.cs.ast.book.passage.pattern.modifier.Ghost;
 import org.x96.sys.foundation.cs.ast.book.passage.pattern.modifier.Shell;
 import org.x96.sys.foundation.cs.lexer.token.Kind;
 import org.x96.sys.foundation.cs.lexer.token.Token;
@@ -18,14 +19,13 @@ class VisitorTest {
 
     @Test
     void happyWrapBuzzVisitorMismatch() {
-        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] {0x30}));
+        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] { 0x30 }));
         t.advance();
         Visitor v = new GhostVisitor(t);
         var e = assertThrows(BuzzVisitorMismatch.class, v::safeVisit);
 
-        String expected =
-                String.format(
-                        """
+        String expected = String.format(
+                """
                         🦕 [0xFFF]
                         🐝 [BuzzVisitorMismatch]
                         🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
@@ -35,14 +35,14 @@ class VisitorTest {
                         1:1 | ^
                           2 |\s
                         """,
-                        discoveryAllowed(v.getClass()));
+                discoveryAllowed(v.getClass()));
         String message = e.getMessage();
         assertEquals(expected, message.replaceAll("\u001B\\[[;\\d]*m", ""));
     }
 
     @Test
     void happyBuzzVisitorMismatch() {
-        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] {0x30, 0x30}));
+        Tokenizer t = new Tokenizer(ByteStream.wrapped(new byte[] { 0x30, 0x30 }));
         t.advance();
         t.advance();
 
@@ -51,15 +51,15 @@ class VisitorTest {
         assertEquals(
                 String.format(
                         """
-                        🦕 [0xFFF]
-                        🐝 [BuzzVisitorMismatch]
-                        🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
-                           > Tokenizer.pointer[2]
-                           > Tokens Allowed [%s]
-                          1 | 00
-                        1:2 |  ^
-                          2 |\s
-                        """,
+                                🦕 [0xFFF]
+                                🐝 [BuzzVisitorMismatch]
+                                🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
+                                   > Tokenizer.pointer[2]
+                                   > Tokens Allowed [%s]
+                                  1 | 00
+                                1:2 |  ^
+                                  2 |\s
+                                """,
                         discoveryAllowed(v.getClass())),
                 e.getMessage()
                         .replace("\u0002", "") // remove byte 2
@@ -70,7 +70,7 @@ class VisitorTest {
     private String discoveryAllowed(Class<? extends Visitor> v) {
         List<String> l = new LinkedList<>();
         for (int i = 0; i < 0x80; i++) {
-            Tokenizer t = new Tokenizer(ByteStream.raw(new byte[] {(byte) i}));
+            Tokenizer t = new Tokenizer(ByteStream.raw(new byte[] { (byte) i }));
             if (ReflectiveVisitorFactory.happens(v, t).allowed()) {
                 l.add(String.format("0x%X", i));
             }
@@ -80,13 +80,12 @@ class VisitorTest {
 
     @Test
     void happyBuzzVisitorMismatchMultiline() {
-        byte[] payload =
-                """
+        byte[] payload = """
                 ceci&sofi
                 sofi0ceci
                 ceci&sofi
                 """
-                        .getBytes();
+                .getBytes();
         Tokenizer t = new Tokenizer(ByteStream.raw(payload));
         Visitor v = new GhostVisitor(t);
         while (v.allowed()) {
@@ -96,35 +95,34 @@ class VisitorTest {
         assertEquals(
                 String.format(
                         """
-                        🦕 [0xFFF]
-                        🐝 [BuzzVisitorMismatch]
-                        🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
-                           > Tokenizer.pointer[14]
-                           > Tokens Allowed [%s]
-                          1 | ceci&sofi
-                          2 | sofi0ceci
-                        2:5 |     ^
-                          3 | ceci&sofi
-                        """,
+                                🦕 [0xFFF]
+                                🐝 [BuzzVisitorMismatch]
+                                🌵 > Atual visitante [GhostVisitor] encontrou token [0x30] inesperado;
+                                   > Tokenizer.pointer[14]
+                                   > Tokens Allowed [%s]
+                                  1 | ceci&sofi
+                                  2 | sofi0ceci
+                                2:5 |     ^
+                                  3 | ceci&sofi
+                                """,
                         discoveryAllowed(v.getClass())),
                 e.getMessage().replaceAll("\u001B\\[[;\\d]*m", ""));
     }
 
     @Test
     void happyStx() {
-        Visitor visitorStx =
-                new Visitor(new Tokenizer(ByteStream.raw(new byte[] {0x2}))) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isStx(look());
-                    }
+        Visitor visitorStx = new Visitor(new Tokenizer(ByteStream.raw(new byte[] { 0x2 }))) {
+            @Override
+            public boolean allowed() {
+                return Kind.isStx(look());
+            }
 
-                    @Override
-                    public Token[] visit() {
-                        rec();
-                        return stream();
-                    }
-                };
+            @Override
+            public Token[] visit() {
+                rec();
+                return stream();
+            }
+        };
         assertTrue(visitorStx.allowed());
         Token[] tokens = visitorStx.safeVisit();
         assertEquals(1, tokens.length);
@@ -133,21 +131,20 @@ class VisitorTest {
 
     @Test
     void happySingleVisit() {
-        Tokenizer tk = new Tokenizer(ByteStream.raw(new byte[] {0x1, 0x2}));
+        Tokenizer tk = new Tokenizer(ByteStream.raw(new byte[] { 0x1, 0x2 }));
         tk.advance();
-        Visitor visitorStx =
-                new Visitor(tk) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isStx(look());
-                    }
+        Visitor visitorStx = new Visitor(tk) {
+            @Override
+            public boolean allowed() {
+                return Kind.isStx(look());
+            }
 
-                    @Override
-                    public Token[] visit() {
-                        rec();
-                        return stream();
-                    }
-                };
+            @Override
+            public Token[] visit() {
+                rec();
+                return stream();
+            }
+        };
         assertTrue(visitorStx.allowed());
         Token[] tokens = visitorStx.safeVisit();
         assertEquals(1, tokens.length);
@@ -156,18 +153,23 @@ class VisitorTest {
 
     @Test
     void happyOverKind() {
-        Visitor visitorStx =
-                new Visitor(new Tokenizer(ByteStream.raw(new byte[] {0x2}))) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isStx(look());
-                    }
+        Visitor visitorStx = new Visitor(new Tokenizer(ByteStream.raw(new byte[] { 0x2 }))) {
+            @Override
+            public boolean allowed() {
+                return Kind.isStx(look());
+            }
 
-                    @Override
-                    public String overkind() {
-                        return "UNKNOWN";
-                    }
-                };
+            @Override
+            public Token[] visit() {
+                rec(overKind());
+                return stream();
+            }
+
+            @Override
+            public String overKind() {
+                return "UNKNOWN";
+            }
+        };
         assertTrue(visitorStx.allowed());
         Token[] tokens = visitorStx.safeVisit();
         assertEquals(1, tokens.length);
@@ -177,73 +179,69 @@ class VisitorTest {
 
     @Test
     void happyNameless() {
-        Visitor visitorStx =
-                new Visitor(new Tokenizer(ByteStream.raw(new byte[] {0x2}))) {
-                    @Override
-                    public boolean allowed() {
-                        return false;
-                    }
-                };
+        Visitor visitorStx = new Visitor(new Tokenizer(ByteStream.raw(new byte[] { 0x2 }))) {
+            @Override
+            public boolean allowed() {
+                return false;
+            }
+        };
         assertEquals("", visitorStx.visitorName(), "default visitor has no name");
     }
 
     @Test
     void happyName() {
-        Visitor visitorStx =
-                new Visitor(new Tokenizer(ByteStream.raw(new byte[] {0x2}))) {
-                    @Override
-                    public boolean allowed() {
-                        return false;
-                    }
+        Visitor visitorStx = new Visitor(new Tokenizer(ByteStream.raw(new byte[] { 0x2 }))) {
+            @Override
+            public boolean allowed() {
+                return false;
+            }
 
-                    @Override
-                    public String visitorName() {
-                        return "default";
-                    }
-                };
+            @Override
+            public String visitorName() {
+                return "default";
+            }
+        };
         assertEquals("default", visitorStx.visitorName());
     }
 
     @Test
     void happyWord() {
         Tokenizer tokenizer = new Tokenizer(ByteStream.raw("'ceci&sofi'".getBytes()));
-        Visitor visitorWord =
-                new Visitor(tokenizer) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isApostrophe(look());
-                    }
+        Visitor visitorWord = new Visitor(tokenizer) {
+            @Override
+            public boolean allowed() {
+                return Kind.isApostrophe(look());
+            }
 
-                    @Override
-                    public Token[] visit() {
-                        mark();
-                        fill();
-                        mark();
-                        return stream();
-                    }
+            @Override
+            public Token[] visit() {
+                mark();
+                fill();
+                mark();
+                return stream();
+            }
 
-                    @Override
-                    public String visitorName() {
-                        return "- Word";
-                    }
+            @Override
+            public String visitorName() {
+                return "- Word";
+            }
 
-                    private void fill() {
-                        while (denied() && tokenizer.ready()) {
-                            rec();
-                        }
-                    }
+            private void fill() {
+                while (denied() && tokenizer.ready()) {
+                    rec();
+                }
+            }
 
-                    private void mark() {
-                        if (allowed()) {
-                            rec("Word");
-                        } else {
-                            String explain =
-                                    String.format(
-                                            "eh esperado `'`; encontrado: [%s]", (char) look());
-                            throw new RuntimeException(explain);
-                        }
-                    }
-                };
+            private void mark() {
+                if (allowed()) {
+                    rec("Word");
+                } else {
+                    String explain = String.format(
+                            "eh esperado `'`; encontrado: [%s]", (char) look());
+                    throw new RuntimeException(explain);
+                }
+            }
+        };
         assertEquals("- Word", visitorWord.visitorName());
 
         Token[] tokens = visitorWord.visit();
@@ -274,44 +272,42 @@ class VisitorTest {
     @Test
     void happyWordWithAlphaLow() {
         Tokenizer tokenizer = new Tokenizer(ByteStream.raw("'cecisofi'".getBytes()));
-        Visitor visitorWord =
-                new Visitor(tokenizer) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isApostrophe(look());
-                    }
+        Visitor visitorWord = new Visitor(tokenizer) {
+            @Override
+            public boolean allowed() {
+                return Kind.isApostrophe(look());
+            }
 
-                    @Override
-                    public Token[] visit() {
-                        mark();
-                        fill();
-                        mark();
-                        return stream();
-                    }
+            @Override
+            public Token[] visit() {
+                mark();
+                fill();
+                mark();
+                return stream();
+            }
 
-                    @Override
-                    public String visitorName() {
-                        return "- Word";
-                    }
+            @Override
+            public String visitorName() {
+                return "- Word";
+            }
 
-                    private void fill() {
-                        if (denied() && tokenizer.ready()) {
-                            push(new AlphaLow(tokenizer).safeVisit());
-                            fill();
-                        }
-                    }
+            private void fill() {
+                if (denied() && tokenizer.ready()) {
+                    push(new AlphaLow(tokenizer).safeVisit());
+                    fill();
+                }
+            }
 
-                    private void mark() {
-                        if (allowed()) {
-                            rec("Word");
-                        } else {
-                            String explain =
-                                    String.format(
-                                            "eh esperado `'`; encontrado: [%s]", (char) look());
-                            throw new RuntimeException(explain);
-                        }
-                    }
-                };
+            private void mark() {
+                if (allowed()) {
+                    rec("Word");
+                } else {
+                    String explain = String.format(
+                            "eh esperado `'`; encontrado: [%s]", (char) look());
+                    throw new RuntimeException(explain);
+                }
+            }
+        };
         assertEquals("- Word", visitorWord.visitorName());
 
         Token[] tokens = visitorWord.visit();
@@ -450,49 +446,48 @@ class VisitorTest {
     @Test
     void happyWordAtomicWithAlphaLow() {
         Tokenizer tokenizer = new Tokenizer(ByteStream.raw("'cecisofi'".getBytes()));
-        Visitor visitorWord =
-                new Visitor(tokenizer) {
-                    @Override
-                    public boolean allowed() {
-                        return Kind.isApostrophe(look());
-                    }
+        Visitor visitorWord = new Visitor(tokenizer) {
+            @Override
+            public boolean allowed() {
+                return Kind.isApostrophe(look());
+            }
 
-                    @Override
-                    public Token[] visit() {
-                        mark();
-                        fill();
-                        mark();
-                        return stream();
-                    }
+            @Override
+            public Token[] visit() {
+                mark();
+                fill();
+                mark();
+                setMod(new Shell(0x40));
+                return stream();
+            }
 
-                    @Override
-                    public String visitorName() {
-                        return "- Word";
-                    }
+            @Override
+            public String visitorName() {
+                return "- Word";
+            }
 
-                    private void fill() {
-                        if (denied() && tokenizer.ready()) {
-                            push(new AlphaLow(tokenizer).safeVisit());
-                            fill();
-                        }
-                    }
+            private void fill() {
+                if (denied() && tokenizer.ready()) {
+                    push(new AlphaLow(tokenizer).safeVisit());
+                    fill();
+                }
+            }
 
-                    private void mark() {
-                        if (allowed()) {
-                            rec("gonabeover");
-                        } else {
-                            String explain =
-                                    String.format(
-                                            "eh esperado `'`; encontrado: [%s]", (char) look());
-                            throw new RuntimeException(explain);
-                        }
-                    }
+            private void mark() {
+                if (allowed()) {
+                    rec("gonabeover");
+                } else {
+                    String explain = String.format(
+                            "eh esperado `'`; encontrado: [%s]", (char) look());
+                    throw new RuntimeException(explain);
+                }
+            }
 
-                    @Override
-                    public String overkind() {
-                        return "wrd";
-                    }
-                };
+            @Override
+            public String overKind() {
+                return "wrd";
+            }
+        };
         visitorWord.setMod(new Shell("@".getBytes()[0]));
         assertEquals("- Word", visitorWord.visitorName());
 

@@ -1,4 +1,4 @@
-BUILD_DIR     = build
+BUILD_DIR     = out
 MAIN_BUILD    = $(BUILD_DIR)/main
 TEST_BUILD    = $(BUILD_DIR)/test
 
@@ -57,23 +57,17 @@ DISTRO_JAR = org.x96.sys.foundation.cs.lexer.visitor.jar
 
 CP = $(CS_AST_JAR):$(CS_FLUX_JAR):$(CS_TOKEN_JAR):$(CS_KIND_JAR):$(CS_TOKENIZER_JAR):$(CS_ROUTER_JAR)
 
-gen-terminal-visitors:
-	@echo ruby -v
-	@echo "🔧 Gerando Terminal Visitors..."
-	@ruby scripts/visitors.rb
-	@echo "✅ Kind gerado com sucesso!"
-
-build: gen-build-info libs | $(MAIN_BUILD)
+build: gen-build-info libs
 	@javac --version
 	@javac -d $(MAIN_BUILD) -cp $(CP) $(JAVA_SOURCES)
 	@echo "✅ Compilação concluída com sucesso!"
 
-build-test:
-	@javac -cp $(MAIN_BUILD):$(JUNIT_JAR):$(CP) -d $(TEST_BUILD) \
+build/test:
+	@javac -Xlint:deprecation -cp $(MAIN_BUILD):$(JUNIT_JAR):$(CP) -d $(TEST_BUILD) \
      $(shell find $(SRC_TEST) -name "*.java")
 	@echo "✅ Compilação de testes concluída com sucesso!"
 
-test: build-test
+test: clean/build/test clean/build build build/test
 	@java -jar $(JUNIT_JAR) \
      execute \
      --class-path $(TEST_BUILD):$(MAIN_BUILD):$(CP) \
@@ -112,7 +106,6 @@ distro:
 
 tools/jacoco: tools/jacoco_cli tools/jacoco_agent
 
-# Gera automaticamente o arquivo BuildInfo.java
 gen-build-info:
 	@ruby -v
 	@echo "🔧 Gerando BuildInfo..."
@@ -122,7 +115,7 @@ gen-build-info:
 	  $(SRC_MAIN)/org/x96/sys/foundation/visitor/BuildInfo.java
 	@echo "✅ BuildInfo gerado com sucesso!"
 
-format: tools/gjf ## Formata todo o código fonte Java com google-java-format
+format: tools/gjf
 	find src -name "*.java" -print0 | xargs -0 java -jar $(GJF_JAR) --aosp --replace
 
 $(LIB_DIR) $(TOOL_DIR) $(MAIN_BUILD) $(TEST_BUILD):
@@ -154,6 +147,16 @@ $(eval $(call deps,tools,junit,JUNIT))
 $(eval $(call deps,tools,jacoco_cli,JACOCO_CLI))
 $(eval $(call deps,tools,jacoco_agent,JACOCO_AGENT))
 
+clean/build:
+	@rm -rf $(MAIN_BUILD)
+	@echo "[🧹] [clean] [$(MAIN_BUILD)]"
+
+clean/build/test:
+	@rm -rf $(TEST_BUILD)
+	@echo "[🧹] [clean] [$(TEST_BUILD)]"
+
 clean:
 	@rm -rf $(BUILD_DIR) $(TOOL_DIR) $(LIB_DIR)
-	@echo "[🧹] [clean] Build directory cleaned."
+	@echo "[🧹] [clean] [$(BUILD_DIR)]"
+	@echo "[🧹] [clean] [$(LIB_DIR)]"
+	@echo "[🧹] [clean] [$(TOOL_DIR)]"
