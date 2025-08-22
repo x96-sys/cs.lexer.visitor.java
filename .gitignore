@@ -1,0 +1,12 @@
+build
+lib
+tools
+build.xml
+manifest.mf
+nbproject
+*.jar
+src/main/org/x96/sys/foundation/cs/lexer/visitor/entry/terminals/*
+src/main/org/x96/sys/foundation/visitor/BuildInfo.java
+.idea
+.zig-cache
+*.iml

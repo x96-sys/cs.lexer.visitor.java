@@ -47,13 +47,15 @@ CS_ROUTER_VERSION = 0.1.2
 CS_ROUTER_JAR     = $(LIB_DIR)/org.x96.sys.foundation.cs.lexer.router.jar
 CS_ROUTER_URL     = https://github.com/x96-sys/cs.lexer.router.java/releases/download/v$(CS_ROUTER_VERSION)/org.x96.sys.foundation.cs.lexer.router.jar
 
+CS_AST_VERSION = 0.1.2
+CS_AST_JAR = $(LIB_DIR)/org.x96.sys.foundation.cs.ast.jar
+CS_AST_URL = https://github.com/x96-sys/cs.ast.java/releases/download/v0.1.2/org.x96.sys.foundation.cs.ast.jar
+
 JAVA_SOURCES = $(shell find $(SRC_MAIN) -name "*.java")
 
 DISTRO_JAR = org.x96.sys.foundation.cs.lexer.visitor.jar
 
-CP = $(CS_FLUX_JAR):$(CS_TOKEN_JAR):$(CS_KIND_JAR):$(CS_TOKENIZER_JAR):$(CS_ROUTER_JAR)
-
-libs: lib/flux lib/cs-token lib/cs-kind lib/cs-tokenizer lib/cs-router
+CP = $(CS_AST_JAR):$(CS_FLUX_JAR):$(CS_TOKEN_JAR):$(CS_KIND_JAR):$(CS_TOKENIZER_JAR):$(CS_ROUTER_JAR)
 
 gen-terminal-visitors:
 	@echo ruby -v
@@ -66,7 +68,7 @@ build: gen-build-info libs | $(MAIN_BUILD)
 	@javac -d $(MAIN_BUILD) -cp $(CP) $(JAVA_SOURCES)
 	@echo "✅ Compilação concluída com sucesso!"
 
-build-test: build tools/junit | $(TEST_BUILD)
+build-test:
 	@javac -cp $(MAIN_BUILD):$(JUNIT_JAR):$(CP) -d $(TEST_BUILD) \
      $(shell find $(SRC_TEST) -name "*.java")
 	@echo "✅ Compilação de testes concluída com sucesso!"
@@ -123,17 +125,8 @@ gen-build-info:
 format: tools/gjf ## Formata todo o código fonte Java com google-java-format
 	find src -name "*.java" -print0 | xargs -0 java -jar $(GJF_JAR) --aosp --replace
 
-$(LIB_DIR):
-	@mkdir -p $(LIB_DIR)
-
-$(MAIN_BUILD):
-	@mkdir -p $(MAIN_BUILD)
-
-$(TEST_BUILD):
-	@mkdir -p $(TEST_BUILD)
-
-$(TOOL_DIR):
-	@mkdir -p $(TOOL_DIR)
+$(LIB_DIR) $(TOOL_DIR) $(MAIN_BUILD) $(TEST_BUILD):
+	@mkdir -p $@
 
 define deps
 $1/$2: $1
@@ -141,15 +134,21 @@ $1/$2: $1
 		echo "[📦] [🚛] [$$($3_VERSION)] [$2]"; \
 		curl -sSL -o $$($3_JAR) $$($3_URL); \
 	else \
-		echo "[📦] [✅] [$$($3_VERSION)] [$2]"; \
+		echo "[📦] [📍] [$$($3_VERSION)] [$2]"; \
 	fi
 endef
+
+libs: lib/flux lib/cs-token lib/cs-kind lib/cs-tokenizer lib/cs-router lib/cs-ast
 
 $(eval $(call deps,lib,flux,CS_FLUX))
 $(eval $(call deps,lib,cs-token,CS_TOKEN))
 $(eval $(call deps,lib,cs-tokenizer,CS_TOKENIZER))
 $(eval $(call deps,lib,cs-kind,CS_KIND))
 $(eval $(call deps,lib,cs-router,CS_ROUTER))
+$(eval $(call deps,lib,cs-ast,CS_AST))
+
+kit: tools/gjf tools/junit tools/jacoco_cli tools/jacoco_agent
+
 $(eval $(call deps,tools,gjf,GJF))
 $(eval $(call deps,tools,junit,JUNIT))
 $(eval $(call deps,tools,jacoco_cli,JACOCO_CLI))
