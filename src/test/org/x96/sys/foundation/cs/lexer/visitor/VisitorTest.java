@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.x96.sys.foundation.buzz.cs.lexer.visitor.BuzzVisitorMismatch;
-import org.x96.sys.foundation.cs.ast.book.passage.pattern.modifier.Ghost;
 import org.x96.sys.foundation.cs.ast.book.passage.pattern.modifier.Shell;
 import org.x96.sys.foundation.cs.lexer.token.Kind;
 import org.x96.sys.foundation.cs.lexer.token.Token;
@@ -457,7 +456,7 @@ class VisitorTest {
                 mark();
                 fill();
                 mark();
-                setMod(new Shell(0x40));
+                setMod(new Shell((byte) 0x40));
                 return stream();
             }
 

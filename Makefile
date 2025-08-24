@@ -39,17 +39,17 @@ CS_TOKEN_VERSION = 0.1.3
 CS_TOKEN_JAR     = $(LIB_DIR)/org.x96.sys.foundation.cs.lexer.token.jar
 CS_TOKEN_URL     = https://github.com/x96-sys/cs.lexer.token.java/releases/download/v0.1.3/org.x96.sys.foundation.cs.lexer.token.jar
 
-CS_TOKENIZER_VERSION = 0.1.6
+CS_TOKENIZER_VERSION = 0.1.7
 CS_TOKENIZER_JAR     = $(LIB_DIR)/org.x96.sys.foundation.cs.lexer.tokenizer.jar
 CS_TOKENIZER_URL     = https://github.com/x96-sys/cs.lexer.tokenizer.java/releases/download/v$(CS_TOKENIZER_VERSION)/org.x96.sys.foundation.cs.lexer.tokenizer.jar
 
-CS_ROUTER_VERSION = 0.1.2
+CS_ROUTER_VERSION = 0.1.3
 CS_ROUTER_JAR     = $(LIB_DIR)/org.x96.sys.foundation.cs.lexer.router.jar
 CS_ROUTER_URL     = https://github.com/x96-sys/cs.lexer.router.java/releases/download/v$(CS_ROUTER_VERSION)/org.x96.sys.foundation.cs.lexer.router.jar
 
-CS_AST_VERSION = 0.1.2
+CS_AST_VERSION = 0.2.2
 CS_AST_JAR = $(LIB_DIR)/org.x96.sys.foundation.cs.ast.jar
-CS_AST_URL = https://github.com/x96-sys/cs.ast.java/releases/download/v0.1.2/org.x96.sys.foundation.cs.ast.jar
+CS_AST_URL = https://github.com/x96-sys/cs.ast.java/releases/download/v$(CS_AST_VERSION)/org.x96.sys.foundation.cs.ast.jar
 
 JAVA_SOURCES = $(shell find $(SRC_MAIN) -name "*.java")
 
